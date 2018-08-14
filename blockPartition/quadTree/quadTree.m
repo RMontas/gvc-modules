@@ -1,4 +1,4 @@
-function [imPart] = quadTree(im, bMin, bMax, th)
+function [imPart, quadtreeBitsream] = quadTree(im, bMin, bMax, th, useGradient)
 %% QUADTREE Summary 
 % Block parition using quadtree (similar to HEVC) but limited to power of 2
 % square blocks 
@@ -14,7 +14,11 @@ while bCurrent > bMin
     b = b + 1;
 end
 
-imGrad = imgradient(im);
+%imGrad = imgradient(im);
+imGrad = double(im);
+if useGradient
+    imGrad = imgradient(im);
+end
 imGradNorm = (imGrad - min(min(imGrad))) / (max(max(imGrad)) - min(min(imGrad)));
 %max(block(:)) - min(block(:)) >= th
 quadtreeBitsream = 0;
@@ -22,20 +26,17 @@ bitCounter = 0;
 
 for hb = 1:dimsBlocks(1,1)
     for wb = 1:dimsBlocks(1,2)
-        %% disp current block info (ABS)
+        %% current block info (ABS)
         currentBlockPosAbs = [1 + bMax * (hb - 1)  bMax * hb; ... 
                               1 + bMax * (wb - 1)  bMax * wb];
-        disp(strcat("X = ",num2str(currentBlockPosAbs(2,1))," Y = ", num2str(currentBlockPosAbs(1,1))));
+        %disp(strcat("X = ",num2str(currentBlockPosAbs(2,1))," Y = ", num2str(currentBlockPosAbs(1,1))));
         %%  
         currentBlock = imGradNorm(currentBlockPosAbs(1,1):currentBlockPosAbs(1,2), ... 
-                                  currentBlockPosAbs(2,1):currentBlockPosAbs(2,2));
-        imshow(currentBlock)
-        %pause
-        
+                                  currentBlockPosAbs(2,1):currentBlockPosAbs(2,2));      
         if bMax > bMin
             if max(max(currentBlock)) - min(min(currentBlock)) >= th
                 % split
-                disp("SPLIT")
+                %disp("SPLIT")
                 bitCounter = bitCounter + 1;
                 quadtreeBitsream(bitCounter) = 1;
                 for yb = 1:2
@@ -43,13 +44,13 @@ for hb = 1:dimsBlocks(1,1)
                         %% current quadtree block info (REL)
                         currentQuadtreeBlockPosRel = [1 + (bMax/2) * (yb - 1)  yb * (bMax/2); ...
                                                       1 + (bMax/2) * (xb - 1)  xb * (bMax/2)];
-                        disp(strcat("X = ",num2str(currentQuadtreeBlockPosRel(2,1)) ...
-                                   ," Y = ", num2str(currentQuadtreeBlockPosRel(1,1))));
+                        %disp(strcat("X = ",num2str(currentQuadtreeBlockPosRel(2,1)) ...
+                        %           ," Y = ", num2str(currentQuadtreeBlockPosRel(1,1))));
                         %% current quadtree block info (ABS)
                         currentQuadtreeBlockPosAbs = [currentBlockPosAbs(1,1) + currentQuadtreeBlockPosRel(1,1) - 1  currentBlockPosAbs(1,1) + currentQuadtreeBlockPosRel(1,1) - 2 + bMax/2; ...
                                                       currentBlockPosAbs(2,1) + currentQuadtreeBlockPosRel(2,1) - 1  currentBlockPosAbs(2,1) + currentQuadtreeBlockPosRel(2,1) - 2 + bMax/2];
-                        disp(strcat("X = ",num2str(currentQuadtreeBlockPosAbs(2,1)) ...
-                                   ," Y = ", num2str(currentQuadtreeBlockPosAbs(1,1))));
+                        %disp(strcat("X = ",num2str(currentQuadtreeBlockPosAbs(2,1)) ...
+                        %           ," Y = ", num2str(currentQuadtreeBlockPosAbs(1,1))));
                         %%
                         [bitCounter, quadtreeBitsream] = quadTreeBlock( ... 
                                       currentBlock(currentQuadtreeBlockPosRel(1,1):currentQuadtreeBlockPosRel(1,2), ... 
@@ -60,22 +61,15 @@ for hb = 1:dimsBlocks(1,1)
                     end
                 end
             else
-                disp("DO NOT SPLIT")
+                %disp("DO NOT SPLIT")
                 bitCounter = bitCounter + 1;
                 quadtreeBitsream(bitCounter) = 0;
             end
         end
     end
 end
-% 
-% bitCounter = 0;
-% bCurrent = bMax;
-% for hb = 1:dimsBlocks(1,1)
-%     for wb = 1:dimsBlocks(1,2)
-%         [imPart, bitCounter] = quadTreeParser(quadtreeBitsream, bitCounter, imGradNorm, bMin, bCurrent, imPart, hb, wb); %% IMplement recursive func
-%     end
-% end
 
+[imPart] = quadTreeParser(quadtreeBitsream, imGradNorm, bMin, bMax, dimsBlocks(1,1), dimsBlocks(1,2)); 
 
 end
 
