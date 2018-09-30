@@ -1,0 +1,75 @@
+function [outputArg1,outputArg2] = splitMergeBlock(inputArg1,inputArg2)
+%UNTITLED Summary of this function goes here
+%   Detailed explanation goes here
+
+numEl = bMax / bMin;
+blockPartition = zeros(numEl, numEl);
+
+while not(sum(sum(blockPartition)))
+    
+    for j = 1:numEl
+        for i = 1:numEl
+            if blockPartition(j,i) == 0
+                firstElX = i;
+                firstElY = j;
+                break
+            end
+        end
+    end
+    
+    dirIdx = 1;
+    currentPartitionH = 1;
+    currentPartitionV = 1;
+    while dirIdx
+        
+        blockPartition(firstElY, firstElY) = 1;
+        
+        currentBlockPosAbs = [1 + bMin * (firstElY - 1)  bMin * (currentPartitionH); ...
+            1 + bMin * (firstElX - 1)  bMin * firstElX];
+        currentBlockMergeHorPosAbs = [1 + bMin * (firstElY - 1)  bMin * firstElY; ...
+            1 + bMin * (firstElX - 1)  bMin * (firstElX + 1)];
+        currentBlockMergeVerPosAbs = [1 + bMin * (firstElY - 1)  bMin * (firstElY + 1); ...
+            1 + bMin * (firstElX - 1)  bMin * firstElX];
+        %currentBlockMergeDiagonalPosAbs = [1 + bMin * (hb - 1)  bMin * (hb + 1); ...
+        %                                 1 + bMin * (wb - 1)  bMin * (wb + 1)];
+        %disp(strcat("X = ",num2str(currentBlockPosAbs(2,1))," Y = ", num2str(currentBlockPosAbs(1,1))));
+        %%
+        currentBlock = im(currentBlockPosAbs(1,1):currentBlockPosAbs(1,2), ...
+            currentBlockPosAbs(2,1):currentBlockPosAbs(2,2));
+        currentBlockMergeHor = im(currentBlockMergeHorPosAbs(1,1):currentBlockMergeHorPosAbs(1,2), ...
+            currentBlockMergeHorPosAbs(2,1):currentBlockMergeHorPosAbs(2,2));
+        currentBlockMergeVer = im(currentBlockMergeVerPosAbs(1,1):currentBlockMergeVerPosAbs(1,2), ...
+            currentBlockMergeVerPosAbs(2,1):currentBlockMergeVerPosAbs(2,2));
+        
+        varCurrent = max(max(currentBlock)) - min(min(currentBlock));
+        varMergeHor = max(max(currentBlockMergeHor)) - min(min(currentBlockMergeHor));
+        varMergeVer = max(max(currentBlockMergeVer)) - min(min(currentBlockMergeVer));
+        
+        [maxVar dirIdx] = max([varCurrent varMergeHor varMergeVer]);
+        
+        if maxVar < th
+            % no merge
+            if dirIdx == 0
+                bitCounter = bitCounter + 1;
+                splitMergeBitsream(bitCounter) = 0;
+            end
+            % merge hor
+            if dirIdx == 1
+                bitCounter = bitCounter + 2;
+                splitMergeBitsream(bitCounter - 1) = 1;
+                splitMergeBitsream(bitCounter) = 0;
+            end
+            % merge ver
+            if dirIdx == 2
+                bitCounter = bitCounter + 2;
+                splitMergeBitsream(bitCounter - 1) = 1;
+                splitMergeBitsream(bitCounter) = 1;
+            end
+        end
+        
+    end
+
+end
+
+end
+
