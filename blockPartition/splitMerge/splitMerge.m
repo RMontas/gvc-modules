@@ -31,8 +31,8 @@ for hb = 1:dimsBlocks(1,1)
     end
 end
 
-imPart = 0;
+imPart = imGradNorm;
 [imPart] = spiltMergeParser(splitMergeBitsream, imPart, bMin, bMax, dimsBlocks(1,1), dimsBlocks(1,2));
-
+%figure, imshow(imPart);
 end
 

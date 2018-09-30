@@ -29,14 +29,14 @@ while sum(sum(blockPartition)) < numEl * numEl
         currentBlockMergeVerPosAbs = [1 + bMin * (firstElY - 1)  bMin * (firstElY + currentPartitionV); ...
                                       1 + bMin * (firstElX - 1)  bMin * (firstElX - 1 + currentPartitionH)];
         currentBlock = im(currentBlockPosAbs(1,1):currentBlockPosAbs(1,2), ...
-            currentBlockPosAbs(2,1):currentBlockPosAbs(2,2));
+                          currentBlockPosAbs(2,1):currentBlockPosAbs(2,2));
         cannotDoMergeHor = 0;
         cannotDoMergeVer = 0;
-        if firstElX + currentPartitionH <= numEl
+        if firstElX + currentPartitionH <= numEl % check (ymax,xmax) && (ymin, xmax) 
             if blockPartition(currentBlockMergeHorPosAbs(1,2)/bMin,currentBlockMergeHorPosAbs(2,2)/bMin) == 0 && ...
-               blockPartition(firstElY,currentBlockMergeHorPosAbs(2,2)/bMin)
+               blockPartition(firstElY,currentBlockMergeHorPosAbs(2,2)/bMin) == 0
                 currentBlockMergeHor = im(currentBlockMergeHorPosAbs(1,1):currentBlockMergeHorPosAbs(1,2), ...
-                    currentBlockMergeHorPosAbs(2,1):currentBlockMergeHorPosAbs(2,2));
+                                          currentBlockMergeHorPosAbs(2,1):currentBlockMergeHorPosAbs(2,2));
                 varMergeHor = max(max(currentBlockMergeHor)) - min(min(currentBlockMergeHor));
             else
                 cannotDoMergeHor = 1;
@@ -48,7 +48,7 @@ while sum(sum(blockPartition)) < numEl * numEl
         end
         if firstElY + currentPartitionV <= numEl
             if blockPartition(currentBlockMergeVerPosAbs(1,2)/bMin,currentBlockMergeVerPosAbs(2,2)/bMin) == 0 && ...
-               blockPartition(firstElY,currentBlockMergeVerPosAbs(2,2)/bMin) == 0
+               blockPartition(currentBlockMergeVerPosAbs(1,2)/bMin,firstElX) == 0
             currentBlockMergeVer = im(currentBlockMergeVerPosAbs(1,1):currentBlockMergeVerPosAbs(1,2), ...
                 currentBlockMergeVerPosAbs(2,1):currentBlockMergeVerPosAbs(2,2));
             varMergeVer = max(max(currentBlockMergeVer)) - min(min(currentBlockMergeVer));

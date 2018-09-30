@@ -1,7 +1,7 @@
 clear all;
 I = imread('liftingbody.png');
 bMin = 8;
-bMax = 256;
+bMax = 64;
 
 %% no gradient
 i = 1;
